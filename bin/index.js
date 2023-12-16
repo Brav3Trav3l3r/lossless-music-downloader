@@ -1,23 +1,35 @@
 #! /usr/bin/env node
 const yargs = require("yargs");
-const axios = require("axios");
-const fetch = require("node-fetch");
+const getSong = require("./utils/getSong");
+const puppeteer = require("puppeteer");
+const waitUntilDownload = require("./utils/waitUntilDownload");
 
 const args = yargs(process.argv.slice(2)).argv;
 
-console.log(typeof args.t);
-
 // get track data
-const track = args.t || "i need a dollar";
-const artist = args.a || "aloe blacc";
+const downloadTrack = async () => {
+  const songUrl = await getSong(args.t, args.m, args.a);
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
 
-const url = `https://api.deezer.com/search?q=artist:"${artist}" track:"${track}"`;
+  if (!songUrl) {
+    console.log("No song found. Are you sure inputs are correct?");
+    return browser.close();
+  }
 
-const getSong = async (track, artist) => {
-  const res = await fetch(url);
-  const data = await res.json();
+  await page.goto("https://doubledouble.top/");
+  await page.type("#dl-input", songUrl);
+  await page.click("#dl-button");
 
-  console.log(data);
+  const client = await page.target().createCDPSession();
+  await client.send("Page.setDownloadBehavior", {
+    behavior: "allow",
+    downloadPath: args.o,
+  });
+
+  await waitUntilDownload(page);
+
+  browser.close();
 };
 
-getSong(track, artist);
+downloadTrack();
