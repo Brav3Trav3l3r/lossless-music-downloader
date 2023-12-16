@@ -3,7 +3,7 @@ const axios = require("axios");
 module.exports = async (track, musician, album) => {
   const url = `https://api.deezer.com/search?q=track:"${track}" artist:"${
     musician ?? ""
-  }" album:"${album ?? ""}`;
+  }" album:"${album ?? ""}"`;
 
   const songsList = await axios.get(url);
 
