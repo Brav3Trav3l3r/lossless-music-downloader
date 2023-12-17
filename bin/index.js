@@ -32,21 +32,18 @@ const args = yargs(process.argv.slice(2))
 
 const downloadTrack = async () => {
   const spinner = ora('Finding song...').start();
-  const songUrl = await getSong(args.t, args.m, args.a);
-
   const browser = await puppeteer.launch({ headless: 'new' });
   const page = await browser.newPage();
+  let songUrl;
 
-  if (!songUrl) {
-    spinner.fail('Song not found. Are you sure inputs are correct?');
+  try {
+    songUrl = await getSong(args.t, args.m, args.a, spinner);
+  } catch (err) {
+    spinner.fail(err.message);
     return browser.close();
   }
 
-  spinner.text = 'Song found';
-  await new Promise((resolve, reject) => {
-    setTimeout(resolve, 2000);
-  });
-
+  spinner.start();
   spinner.text = 'Preparing to download';
   await page.goto('https://doubledouble.top/');
   await page.type('#dl-input', songUrl);

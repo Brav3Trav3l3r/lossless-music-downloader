@@ -12,6 +12,7 @@
   "author": "yash gajbhiye",
   "license": "ISC",
   "dependencies": {
+    "@inquirer/prompts": "^3.3.0",
     "axios": "^1.6.2",
     "chalk": "^4.1.2",
     "node-fetch": "^2.7.0",
